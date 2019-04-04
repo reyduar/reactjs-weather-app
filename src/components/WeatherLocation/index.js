@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
+import CircularProgress from 'material-ui/CircularProgress';
+import PropTypes from 'prop-types';
 import Location from './Location';
 import WeatherData from './WeatherData';
 import transformWeather from './../../services/transformWeather';
-import { apiUrl } from './../../constants/api_url';
+import getUrlWeatherCity from './../../services/getUrlWeatherCity';
 import './styles.css';
 
 class WeatherLocation extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
+    const { city } = props;
     this.state = {
-      city: 'Resistencia',
+      city,
       data: null
     };
     console.log('constructor');
@@ -28,6 +31,7 @@ class WeatherLocation extends Component {
   }
 
   handleUpdateClick = () => {
+    const apiUrl = getUrlWeatherCity(this.state.city);
     fetch(apiUrl)
       .then(resolve => {
         return resolve.json();
@@ -45,15 +49,21 @@ class WeatherLocation extends Component {
   render() {
     // Por destructring
     const { city, data } = this.state;
+    const { onWeatherLocationClick } = this.props;
     return (
-      <div className="weatherLocationCont">
+      <div className="weatherLocationCont" onClick={onWeatherLocationClick}>
         <Location city={city} />
         {/*Aqui usamos un operador ternario para mostar un label de actualizando mientras carga*/}
-        {data ? <WeatherData data={data} /> : 'Actualizando..'}
+        {data ? <WeatherData data={data} /> : <CircularProgress size={50} />}
         {/* <button onClick={this.handleUpdateClick}>Refresh</button> */}
       </div>
     );
   }
 }
+
+WeatherLocation.propTypes = {
+  city: PropTypes.string.isRequired,
+  onWeatherLocationClick: PropTypes.func
+};
 
 export default WeatherLocation;
